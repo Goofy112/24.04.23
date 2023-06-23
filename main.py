@@ -1,77 +1,85 @@
-# Создание пользовательских исключений
-class MyCustomException(BaseException):
+class UsernameAlreadyExistsException(BaseException):
     pass
 
-class MyOtherException(BaseException):
+class UserNotFoundException(BaseException):
     pass
 
-class MyThirdException(BaseException):
+class InvalidUserException(BaseException):
     pass
 
-# Класс, который хранит баланс и обрабатывает платежи
 class PaymentProcessor:
     def __init__(self):
         self.balance = 0
+        # Конструктор инициализирует баланс платежного процессора
 
     def add_funds(self, amount):
-        # Проверка на отрицательный баланс и выброс исключения, если значение отрицательное
         if amount < 0:
-            raise ValueError("Amount cannot be negative.")
+            raise ValueError("Сумма не может быть отрицательной.")
         self.balance += amount
+        # Метод добавляет средства на баланс платежного процессора
 
     def make_payment(self, amount):
-        # Проверка на положительное значение платежа и выброс исключения, если значение меньше или равно 0
         if amount <= 0:
-            raise ValueError("Amount must be greater than zero.")
-        # Проверка наличия достаточных средств и выброс исключения, если средств недостаточно
+            raise ValueError("Сумма должна быть больше нуля.")
         if amount > self.balance:
-            raise ValueError("Insufficient funds.")
+            raise ValueError("Недостаточно средств.")
         self.balance -= amount
+        # Метод совершает платеж и уменьшает баланс платежного процессора
 
     def get_balance(self):
         return self.balance
+        # Метод возвращает текущий баланс платежного процессора
 
-# Класс, который представляет пользователя и его свойства
 class User:
     def __init__(self, username, email):
         self.username = username
         self.email = email
+        # Конструктор инициализирует имя пользователя и адрес электронной почты
 
-# Класс, который управляет пользователями
 class UserManager:
     def __init__(self):
         self.users = {}
+        # Конструктор инициализирует пустой словарь для хранения пользователей
 
     def add_user(self, user):
         try:
-            # Проверка, что добавляемый пользователь является экземпляром класса User и выброс исключения, если это не так
             if not isinstance(user, User):
-                raise TypeError("user should be an instance of User class")
-            # Проверка наличия пользователя с таким же именем и выброс исключения, если пользователь существует
+                raise InvalidUserException("Пользователь должен быть экземпляром класса User.")
             if user.username in self.users:
-                raise ValueError("User with this username already exists")
+                raise UsernameAlreadyExistsException("Пользователь с таким именем уже существует.")
             self.users[user.username] = user
-        except (TypeError, ValueError) as e:
-            # Вывод ошибки в консоль, если она произошла при добавлении пользователя
-            print(f"Error adding user: {e}")
+            print("Пользователь успешно добавлен.")
+        except (InvalidUserException, UsernameAlreadyExistsException) as e:
+            print(f"Ошибка при добавлении пользователя: {e}")
+        # Метод добавляет нового пользователя в список пользователей
 
     def get_user(self, username):
         try:
-            # Проверка наличия пользователя с заданным именем и выброс исключения, если пользователь не существует
             if username not in self.users:
-                raise ValueError("User with this username does not exist")
+                raise UserNotFoundException("Пользователь с таким именем не найден.")
             return self.users[username]
-        except ValueError as e:
-            # Вывод ошибки в консоль, если она произошла при получении пользователя
-            print(f"Error getting user: {e}")
+        except UserNotFoundException as e:
+            print(f"Ошибка при получении пользователя: {e}")
+        # Метод возвращает пользователя по заданному имени пользователя
 
     def remove_user(self, username):
         try:
-            # Проверка наличия пользователя с заданным именем и выброс исключения, если пользователь не существует
             if username not in self.users:
-                raise ValueError("User with this username does not exist")
-            # Удаление пользователя из списка пользователей
+                raise UserNotFoundException("Пользователь с таким именем не найден.")
             del self.users[username]
-            # Если есть `ValueError`, вывести сообщение об ошибке с конкретным исключением
-        except ValueError as e:
-            print(f"Error removing user: {e}")
+            print("Пользователь успешно удален.")
+        except UserNotFoundException as e:
+            print(f"Ошибка при удалении пользователя: {e}")
+        # Метод удаляет пользователя по заданному имени пользователя
+
+user_manager = UserManager()
+
+# Создание пользователей
+user1 = User("john_doe", "john@example.com")
+user2 = User("jane_smith", "jane@example.com")
+user3 = User("john_doe", "another_email@example.com")  # Пользователь с уже существующим именем
+
+# Добавление пользователей
+user_manager.add_user(user1)
+user_manager.add_user(user2)
+user_manager.add_user(user3)  # Попытка добавить пользователя с недопустимым именем
